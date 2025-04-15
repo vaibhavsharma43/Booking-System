@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Doctor from "./app/models/doctor.js"
 import User from "./app/models/user.js";
 import Appointment from "./app/models/appointment.js";
+import Availability from "./app/models/availability.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -30,6 +31,7 @@ async function seed() {
       await Doctor.deleteMany({});
       await User.deleteMany({});
       await Appointment.deleteMany({});
+      await Availability.deleteMany({});
   
       // Add Doctors
       const doctors = await Doctor.insertMany([
@@ -46,6 +48,35 @@ async function seed() {
           phone: "+91-9876543211",
         },
       ]);
+      const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const availabilityData=[];
+      doctors.forEach((doc)=>{
+        daysOfWeek.forEach((day)=>{
+          if(day !="Sunday"){
+            availabilityData.push({
+              doctorId:doc._id,
+              day:day,
+              availableSlots: [{start: "09:00", end: "16:00"}],
+              unavailableSlots: [{ start: "12:00", end: "14:00" }]
+  
+            })
+          }else{
+            availabilityData.push({
+              doctorId:doc._id,
+              day:day,
+              availableSlots: [{start: "09:00", end: "12:00"}],
+              unavailableSlots: [{ start: "9:00", end: "12:00" }]
+  
+            })
+            
+          }
+         
+        })
+      })
+
+
+      const availability = await Availability.insertMany(availabilityData);
+      
   
       // Add Users
       const users = await User.insertMany([
