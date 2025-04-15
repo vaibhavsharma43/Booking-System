@@ -6,16 +6,27 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node src/seeder.js"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.3",
+    "axios": "^1.8.4",
+    "dotenv": "^16.5.0",
+    "mongoose": "^8.13.2",
+    "next": "15.3.0",
+    "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.3.0"
+    "tailwindcss": "^4.1.3"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
     "eslint": "^9",
-    "eslint-config-next": "15.3.0",
-    "@eslint/eslintrc": "^3"
-  }
+    "eslint-config-next": "15.3.0"
+  },
+  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
 }
