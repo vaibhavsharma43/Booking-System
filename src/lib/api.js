@@ -9,10 +9,12 @@ export const bookAppointment = async (data) => {
     const res = await axios.post(`${API_BASE}/api/appointments`, data);
     return res.data;
 };
-export const getAvailableSlots = async (doctorId, date) => {
+export const getAvailableSlots = async (doctorId, date,day) => {
+  console.log("xxxx")
     const response = await axios.get(`${API_BASE}/api/slots`, {
-      params: { doctorId, date },
+      params: { doctorId, date ,day},
 })
+console.log(response.data.available)
 
 return response.data.available;
 };

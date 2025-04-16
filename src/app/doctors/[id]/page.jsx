@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { getAvailableSlots, bookAppointment, getDoctors } from "@/lib/api";
 import AppointmentForm from "@/components/AppointmentForm";
 
 export default function DoctorPage({ params }) {
-  const doctorId = params.id;
+  const { id: doctorId } = use(params); // unwrap the Promise using React.use()
+
   const [doctor, setDoctor] = useState(null);
 
   useEffect(() => {

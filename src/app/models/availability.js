@@ -28,4 +28,4 @@ const availabilitySchema= new mongoose.Schema({
     timestamps:true
 })
 availabilitySchema.index({doctorId:1,day:1},{unique:true});
-export default mongoose.models.availabilitySchema || mongoose.model("Availability",availabilitySchema);
+export default mongoose.models.Availability || mongoose.model("Availability",availabilitySchema);

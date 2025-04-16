@@ -8,16 +8,23 @@ export default function AppointmentForm({ doctorId }) {
   const [slot, setSlot] = useState("");
   const [userId, setUserId] = useState(""); // replace with actual user session
   const [message, setMessage] = useState("");
+  const[day,setDay]=useState("");
 
   useEffect(() => {
+    
+    console.log("Date",date)
     if (date) {
-      getAvailableSlots(doctorId, date).then(setSlots);
+
+   getAvailableSlots(doctorId, date,"Wednesday").then(setSlots)
     }
+
   }, [date, doctorId]);
 
   const handleSubmit = async (e) => {
+    console.log("xxxxxxxxx")
     e.preventDefault();
     try {
+  
       const res = await bookAppointment({ doctorId, userId, date, slot });
       setMessage("Appointment booked successfully");
     } catch (err) {

@@ -97,17 +97,45 @@ async function seed() {
         {
           doctorId: doctors[0]._id,
           userId: users[0]._id,
-          date: "2025-04-15",
+          date: new Date("2025-04-15T00:00:00Z"),
           slot: "10:00",
+          status: "booked",
+        },
+        {
+          doctorId: doctors[0]._id,
+          userId: users[0]._id,
+          date: new Date("2025-04-16T00:00:00Z"),
+          slot: "10:00",
+          status: "booked",
+        },
+        {
+          doctorId: doctors[0]._id,
+          userId: users[1]._id,
+          date: new Date("2025-04-15T00:00:00Z"),
+          slot: "11:00",
           status: "booked",
         },
         {
           doctorId: doctors[1]._id,
           userId: users[1]._id,
-          date: "2025-04-15",
+          date: new Date("2025-04-16T00:00:00Z"),
           slot: "11:30",
           status: "booked",
         },
+        {
+          doctorId: doctors[1]._id,
+          userId: users[0]._id,
+          date: new Date("2025-04-16T00:00:00Z"),
+          slot: "12:30",
+          status: "booked",
+        },
+        {
+          doctorId: doctors[1]._id,
+          userId: users[0]._id,
+          date: new Date("2025-04-16T00:00:00Z"),
+          slot: "12:30",
+          status: "booked",
+        }
       ]);
   
       console.log("✅ Seeding done");
