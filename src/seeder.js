@@ -69,7 +69,7 @@ async function seed() {
         availabilityData.push({
           doctorId: doc._id,
           day: daySchedule,
-          unavailability: [new Date("2025-01-26T00:00:00.000Z")] // ISO Date
+        
         });
       });
 //      availabilityData.push({
