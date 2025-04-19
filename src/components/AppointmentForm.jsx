@@ -3,67 +3,69 @@ import { useState, useEffect } from "react";
 import { getAvailableSlots, bookAppointment } from "@/lib/api";
 
 export default function AppointmentForm({ doctorId }) {
-  const [date, setDate] = useState("");
-  const [slots, setSlots] = useState([]);
-  const [slot, setSlot] = useState("");
-  const [userId, setUserId] = useState(""); // replace with actual user session
-  const [message, setMessage] = useState("");
-  const[day,setDay]=useState("");
+ const [slots, setSlot] = useState([]); // initialize as array
 
   useEffect(() => {
-    
-    console.log("Date",date)
-    if (date) {
+    const fetchSlots = async () => {
+      try {
+        const value = await getAvailableSlots("67ff3273ad9e7e8b0820e4e8", "2025-04-15", "Wednesday");
+        setSlot(value || []);
+      } catch (err) {
+        console.error("Error fetching slots:", err);
+        setSlot([]); 
+      }
+    };
 
-   getAvailableSlots(doctorId, date,"Wednesday").then(setSlots)
-    }
-
-  }, [date, doctorId]);
-
-  const handleSubmit = async (e) => {
-    console.log("xxxxxxxxx")
-    e.preventDefault();
-    try {
-  
-      const res = await bookAppointment({ doctorId, userId, date, slot });
-      setMessage("Appointment booked successfully");
-    } catch (err) {
-      setMessage(err?.response?.data?.error || "Booking failed");
-    }
-  };
+    fetchSlots();
+  }, []);
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-      <input
-        type="text"
-        placeholder="Enter your userId"
-        className="border p-2 w-full"
-        value={userId}
-        onChange={(e) => setUserId(e.target.value)}
-        required
-      />
-      <input
-        type="date"
-        className="border p-2 w-full"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        required
-      />
-      <select
-        className="border p-2 w-full"
-        value={slot}
-        onChange={(e) => setSlot(e.target.value)}
-        required
-      >
-        <option value="">Select a slot</option>
-        {slots.map((s, index) => (
-          <option key={index} value={s}>{s}</option>
-        ))}
-      </select>
-      <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">
-        Book
-      </button>
-      {message && <p className="mt-2">{message}</p>}
-    </form>
+    <div className="container">
+      <form className="max-w-sm mx-auto">
+        <div className="mb-5">
+          <label htmlFor="large-input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Large input
+          </label>
+          <input
+            type="text"
+            id="large-input"
+            placeholder="Please Enter User Id"
+            className="block w-full p-4 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-base focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+        </div>
+
+        <div className="mb-5">
+          <label htmlFor="base-input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Base input
+          </label>
+          <input
+            type="date"
+            id="base-input"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="small-input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            Small input
+          </label>
+          <select
+            id="small-input"
+            className="block w-full p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 text-xs focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            <option value="">Select a Slot</option>
+            {slots.map((s, index) => {
+  const time = `${s.hour.toString().padStart(2, "0")}:${s.minute.toString().padStart(2, "0")}`;
+  return (
+    <option key={index} value={time}>
+      {time}
+    </option>
+  );
+})}
+
+          </select>
+        </div>
+      </form>
+    </div>
   );
 }

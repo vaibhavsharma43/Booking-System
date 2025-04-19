@@ -2,68 +2,80 @@ import { connectDB } from "@/lib/db";
 import Appointment from "@/app/models/appointment";
 import Availability from "@/app/models/availability";
 
-function generateSlots(availableStartTime, availableEndTime, unavailableStartTime, unavailableEndTime) {
-  const [startHour, startMinute] = availableStartTime.split(":").map(Number);
-  const [endHour, endMinute] = availableEndTime.split(":").map(Number);
-
-  const [uStartHour, uStartMinute] = unavailableStartTime.split(":").map(Number);
-  const [uEndHour, uEndMinute] = unavailableEndTime.split(":").map(Number);
-
-  let hour = startHour;
-  let minute = startMinute;
+function generateSlots(availability) {
   const slots = [];
 
-  while (hour < endHour || (hour === endHour && minute < endMinute)) {
-    // Convert current slot time and unavailable range to minutes for easy comparison
-    const currentTimeInMinutes = hour * 60 + minute;
-    const uStartTimeInMinutes = uStartHour * 60 + uStartMinute;
-    const uEndTimeInMinutes = uEndHour * 60 + uEndMinute;
-    // If the slot is outside the unavailable window, keep it
-    if (currentTimeInMinutes < uStartTimeInMinutes || currentTimeInMinutes >= uEndTimeInMinutes) {
-      slots.push({ hour, minute });
-    }
+  availability.forEach(({ start, end, active }) => {
+    if (!active) return;
 
-    minute += 30;
-    if (minute === 60) {
-      minute = 0;
-      hour++;
-    }
-  }
+    let [startHour, startMinute] = start.split(":").map(Number);
+    let [endHour, endMinute] = end.split(":").map(Number);
 
-  // console.log(slots);
+    while (startHour < endHour || (startHour === endHour && startMinute < endMinute)) {
+      const h = String(startHour).padStart(2, "0");
+      const m = String(startMinute).padStart(2, "0");
+      slots.push(`${h}:${m}`);
+
+      startMinute += 30;
+      if (startMinute >= 60) {
+        startMinute = 0;
+        startHour++;
+      }
+    }
+  });
+
   return slots;
 }
 
+
 function getAvailableSlotsAfterAppointments(slots, appointments) {
-  // Convert appointments to a Set for faster lookup
-  const bookedSlotSet = new Set(appointments.map(a => a.slot));
-
-  // Format slot object into "HH:MM" string
-  function formatSlot(slot) {
-    const h = slot.hour.toString().padStart(2, '0');
-    const m = slot.minute.toString().padStart(2, '0');
-    return `${h}:${m}`;
-  }
-
-  // Filter out booked slots
-  return slots.filter(slot => !bookedSlotSet.has(formatSlot(slot)));
+  const bookedSlotSet = new Set(appointments.map(a => a.slot)); // a.slot should be "HH:MM"
+  
+  // No need to format — just check if the slot is booked
+  return slots.filter(slot => !bookedSlotSet.has(slot));
 }
 
+  
 
 
 
 
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export async function GET(req) {
+
     await connectDB();
+  
     const url = new URL(req.url);
     const doctorId = url.searchParams.get("doctorId");
     const dateStr = url.searchParams.get("date");
-    const day = url.searchParams.get("day");
+    const d = new Date(dateStr);
+
+
+    
+    const day = days[d.getDay()];
+    const availability = await Availability.find({ doctorId });
+
   
-    if (!doctorId || !dateStr || !day) {
-      return Response.json({ error: "doctorId, date and day are required" }, { status: 400 });
+
+    if (availability.length > 0 && Array.isArray(availability[0].unavailability)) {
+      const unavailability = availability[0].unavailability;
+    
+    
+      const isOnLeave = unavailability.some(un => {
+        const leaveDate = new Date(un).toISOString().split("T")[0];
+        return leaveDate === dateStr;
+      });
+    
+      if (isOnLeave) {
+        return Response.json({ response: "Doctor is on leave" });
+      }
     }
+    
+    
+
+   const slots =await generateSlots(availability[0].day[day].availability);
+
 
   
     // Convert date string to Date range (UTC safe)
@@ -78,16 +90,7 @@ export async function GET(req) {
     });
 
   
-// console.log(dateOnly); // Output: 2025-04-15
-
-    // Fetch availability for the day
-    const availability = await Availability.find({ doctorId, day });
-    if (!availability || !availability[0].availableSlots || availability[0].availableSlots.length === 0) {
-      return Response.json({ available: [] });
-    }
-  
-   const slots= generateSlots(availability[0].availableSlots[0].start,availability[0].availableSlots[0].end,availability[0].unavailableSlots[0].start,availability[0].unavailableSlots[0].end)
-
+// console.log(appointments)
     const availableSlots=getAvailableSlotsAfterAppointments(slots,appointments);
    
   

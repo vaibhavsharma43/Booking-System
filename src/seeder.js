@@ -49,33 +49,60 @@ async function seed() {
         },
       ]);
       const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-      const availabilityData=[];
-      doctors.forEach((doc)=>{
-        daysOfWeek.forEach((day)=>{
-          if(day !="Sunday"){
-            availabilityData.push({
-              doctorId:doc._id,
-              day:day,
-              availableSlots: [{start: "09:00", end: "16:00"}],
-              unavailableSlots: [{ start: "12:00", end: "14:00" }]
-  
-            })
-          }else{
-            availabilityData.push({
-              doctorId:doc._id,
-              day:day,
-              availableSlots: [{start: "09:00", end: "12:00"}],
-              unavailableSlots: [{ start: "9:00", end: "12:00" }]
-  
-            })
-            
+      const availabilityData = [];
+      
+      doctors.forEach((doc) => {
+        const daySchedule = {};
+      
+        daysOfWeek.forEach((day) => {
+          if (day === "Sunday") {
+            daySchedule[day] = {
+              availability: [{ start: "09:00", end: "12:00", active: false }]
+            };
+          } else {
+            daySchedule[day] = {
+              availability: [{ start: "09:00", end: "12:00", active: true },{ start: "14:00", end: "16:00", active: true }]
+            };
           }
-         
-        })
-      })
+        });
+      
+        availabilityData.push({
+          doctorId: doc._id,
+          day: daySchedule,
+          unavailability: [new Date("2025-01-26T00:00:00.000Z")] // ISO Date
+        });
+      });
+//      availabilityData.push({
+//   doctorId: doctors[0]._id,
+//   day: {
+//     Sunday: {
+//       availability: [{ start: "09:00", end: "12:00", active: true }]
+//     },
+//     Monday: {
+//       availability: [{ start: "09:00", end: "16:00", active: true }]
+//     },
+//     Tuesday: {
+//       availability: [{ start: "09:00", end: "16:00", active: true }]
+//     },
+//     Wednesday: {
+//       availability: [{ start: "09:00", end: "16:00", active: true }]
+//     },
+//     Thursday: {
+//       availability: [{ start: "09:00", end: "16:00", active: true }]
+//     },
+//     Friday: {
+//       availability: [{ start: "09:00", end: "16:00", active: true }]
+//     },
+//     Saturday: {
+//       availability: [{ start: "09:00", end: "16:00", active: true }]
+//     }
+//   },
+//   unavailability: [new Date("2025-01-26T00:00:00.000Z")] // Example unavailability date
+// });
 
-
-      const availability = await Availability.insertMany(availabilityData);
+      
+      await Availability.insertMany(availabilityData);
+      
       
   
       // Add Users
@@ -105,7 +132,14 @@ async function seed() {
           doctorId: doctors[0]._id,
           userId: users[0]._id,
           date: new Date("2025-04-16T00:00:00Z"),
-          slot: "10:00",
+          slot: "15:00",
+          status: "booked",
+        },
+        {
+          doctorId: doctors[0]._id,
+          userId: users[0]._id,
+          date: new Date("2025-04-16T00:00:00Z"),
+          slot: "14:30",
           status: "booked",
         },
         {
