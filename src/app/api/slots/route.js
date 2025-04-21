@@ -1,60 +1,71 @@
 import { connectDB } from "@/lib/db";
 import Appointment from "@/app/models/appointment";
 import Availability from "@/app/models/availability";
-import  Unavailability from "@/app/models/unavailability";
-import {generateSlots} from"@/lib/utils/generateSlots";
-import {getAvailableSlotsAfterAppointments}  from"@/lib/utils/getAvailableSlotsAfterAppointments"
+import Unavailability from "@/app/models/unavailability";
+import { generateSlots } from "@/lib/utils/generateSlots";
+import { getAvailableSlotsAfterAppointments } from "@/lib/utils/getAvailableSlotsAfterAppointments";
+import{mergeUniqueSlots}from "@/lib/utils/mergeUniqueSlots";
 import ExtraAvailability from "@/app/models/extraAvailability";
+import { NextResponse } from "next/server";
 
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export async function GET(req) {
-
+  try {
     await connectDB();
-  
+
     const url = new URL(req.url);
     const doctorId = url.searchParams.get("doctorId");
     const dateStr = url.searchParams.get("date");
     const isoDate = new Date(dateStr);
     const day = days[isoDate.getDay()];
+    const mydate = new Date(isoDate);
 
-    const unavailable= await Unavailability.findOne({doctorId,date:isoDate});
+    const unavailable = await Unavailability.findOne({ doctorId, date: mydate });
 
-
-    // Checking Unavailability
-
-    if (unavailable && unavailable.active === true) {
-      return Response.json("Doctor is not Available");
+    // Check Unavailability
+    if (unavailable?.active) {
+      return NextResponse.json({ message: "Doctor is not available" });
     }
+
     const availability = await Availability.find({ doctorId });
 
+    if (!availability.length) {
+      return NextResponse.json({ message: "No availability schedule found" });
+    }
 
-   
+    const startOfDay = new Date(isoDate.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(isoDate.setHours(23, 59, 59, 999));
 
-  
-    // Convert date string to Date range (UTC safe)
-    const date = new Date(dateStr);
-    const startOfDay = new Date(date.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(date.setHours(23, 59, 59, 999));
-    // Fetch booked appointments
     const appointments = await Appointment.find({
       doctorId,
       date: { $gte: startOfDay, $lte: endOfDay },
       status: "booked",
     });
-  
 
-    const slots =await generateSlots(availability[0].day[day].availability);
-    
-     const extraAvailability = await ExtraAvailability.find({ doctorId });
-    const extraslot= await generateSlots(extraAvailability[0].slots);
-// console.log(appointments)
+    const slots = await generateSlots(availability[0].day[day].availability);
+    const availableSlots = await getAvailableSlotsAfterAppointments(slots, appointments);
 
-    const availableSlots=await getAvailableSlotsAfterAppointments(slots,appointments);4
-    const extraslots=await getAvailableSlotsAfterAppointments(extraslot,appointments);
-console.log(extraslots)
-   
-  
-return Response.json({available: availableSlots,extraAvailability: extraslots});
+    const extraAvailability = await ExtraAvailability.findOne({ doctorId,date:mydate });
+     console.log(extraAvailability)
+    let extraslots = [];
+    let response=[]
+
+    if (extraAvailability && extraAvailability.slots.length>0) {
+      const extraslotRaw = await generateSlots(extraAvailability.slots);
+      extraslots = await getAvailableSlotsAfterAppointments(extraslotRaw, appointments);
+      response=await mergeUniqueSlots(availableSlots,extraslots);
+    }else{
+      response=availableSlots
+    }
+
+    return NextResponse.json({
+      available: response
+      
+    });
+
+  } catch (error) {
+    console.error("Error fetching availability:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  
+}

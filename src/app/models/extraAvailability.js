@@ -16,7 +16,7 @@ const extraAvailabilitySchema = new mongoose.Schema({
     required: true 
   },
   date: { 
-    type:Date,  // or use Date type if you plan to do date operations
+    type:Date,  
     required: true 
   },
   slots: [timeSlotSchema],

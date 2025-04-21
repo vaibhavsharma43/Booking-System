@@ -114,7 +114,7 @@ await Unavailability.insertMany([{
   date: new Date("2025-09-15T00:00:00Z")
 }
 ])
-let date= new Date("2025-04-16T00:00:00.000Z")
+
 
 await ExtraAvailability.insertMany([{
   doctorId:doctors[0],
@@ -125,7 +125,7 @@ await ExtraAvailability.insertMany([{
     start:"14:30",
     end:"17:30"
   }],
-  date:date
+  date: new Date("2025-04-16T00:00:00.000Z")
 }])
       // Add Appointments
       await Appointment.insertMany([
