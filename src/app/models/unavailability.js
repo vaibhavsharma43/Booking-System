@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 const unavailabilitySchema = new mongoose.Schema({
- doctorId: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor" },
+  doctorId: { type: mongoose.Schema.Types.ObjectId, ref: "Doctor" },
  date:{
     type:Date
  },
@@ -10,4 +10,4 @@ const unavailabilitySchema = new mongoose.Schema({
  }
 
 });
-return mongoose.models.Unavailability || mongoose.model.Schema("Unavailability",unavailabilitySchema);
+export default mongoose.models.Unavailability || mongoose.model("Unavailability",unavailabilitySchema);

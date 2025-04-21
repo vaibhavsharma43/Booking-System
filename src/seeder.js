@@ -3,6 +3,8 @@ import Doctor from "./app/models/doctor.js"
 import User from "./app/models/user.js";
 import Appointment from "./app/models/appointment.js";
 import Availability from "./app/models/availability.js";
+import ExtraAvailability from "./app/models/extraAvailability.js";
+import Unavailability from "./app/models/unavailability.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -32,6 +34,8 @@ async function seed() {
       await User.deleteMany({});
       await Appointment.deleteMany({});
       await Availability.deleteMany({});
+      await ExtraAvailability.deleteMany({});
+      await Unavailability.deleteMany({});
   
       // Add Doctors
       const doctors = await Doctor.insertMany([
@@ -68,39 +72,9 @@ async function seed() {
       
         availabilityData.push({
           doctorId: doc._id,
-          day: daySchedule,
-        
+          day: daySchedule
         });
-      });
-//      availabilityData.push({
-//   doctorId: doctors[0]._id,
-//   day: {
-//     Sunday: {
-//       availability: [{ start: "09:00", end: "12:00", active: true }]
-//     },
-//     Monday: {
-//       availability: [{ start: "09:00", end: "16:00", active: true }]
-//     },
-//     Tuesday: {
-//       availability: [{ start: "09:00", end: "16:00", active: true }]
-//     },
-//     Wednesday: {
-//       availability: [{ start: "09:00", end: "16:00", active: true }]
-//     },
-//     Thursday: {
-//       availability: [{ start: "09:00", end: "16:00", active: true }]
-//     },
-//     Friday: {
-//       availability: [{ start: "09:00", end: "16:00", active: true }]
-//     },
-//     Saturday: {
-//       availability: [{ start: "09:00", end: "16:00", active: true }]
-//     }
-//   },
-//   unavailability: [new Date("2025-01-26T00:00:00.000Z")] // Example unavailability date
-// });
-
-      
+      });  
       await Availability.insertMany(availabilityData);
       
       
@@ -118,7 +92,39 @@ async function seed() {
           phone: "+91-8888888888",
         },
       ]);
-  
+     
+await Unavailability.insertMany([{
+  doctorId:doctors[0],
+  date: new Date("2025-04-15T00:00:00Z")
+},{
+  doctorId:doctors[0],
+  date: new Date("2025-08-15T00:00:00Z")
+},
+{
+  doctorId:doctors[0],
+  date: new Date("2025-01-26T00:00:00Z")
+},{
+  doctorId:doctors[1],
+  date: new Date("2025-07-15T00:00:00Z")
+},
+{
+  doctorId:doctors[1],
+  date: new Date("2025-09-15T00:00:00Z")
+}
+])
+let date= new Date("2025-08-24")
+
+await ExtraAvailability.insertMany([{
+  doctorId:doctors[0],
+  slots:[{
+    start:"09:30",
+    end:"13:30"
+  },{
+    start:"14:30",
+    end:"17:30"
+  }],
+  date:date
+}])
       // Add Appointments
       await Appointment.insertMany([
         {
