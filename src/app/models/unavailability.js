@@ -10,4 +10,5 @@ const unavailabilitySchema = new mongoose.Schema({
  }
 
 });
+unavailabilitySchema.index({date:1});
 export default mongoose.models.Unavailability || mongoose.model("Unavailability",unavailabilitySchema);

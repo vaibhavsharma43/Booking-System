@@ -93,6 +93,8 @@ async function seed() {
         },
       ]);
      
+
+      // Add Unavailability
 await Unavailability.insertMany([{
   doctorId:doctors[0],
   date: new Date("2025-04-15T00:00:00Z")
@@ -112,7 +114,7 @@ await Unavailability.insertMany([{
   date: new Date("2025-09-15T00:00:00Z")
 }
 ])
-let date= new Date("2025-08-24")
+let date= new Date("2025-04-16T00:00:00.000Z")
 
 await ExtraAvailability.insertMany([{
   doctorId:doctors[0],
